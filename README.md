@@ -1,0 +1,1 @@
+# relay-wp-l10n
