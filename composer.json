@@ -1,0 +1,22 @@
+{
+    "name": "cachewerk/relay-wp-l10n",
+    "description": "Use Relay to store WordPress translation in PHP runtime memory",
+    "homepage": "https://relay.so",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "preferred-install": "dist",
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "composer/installers": true
+        }
+    },
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-relay": ">=0.6.7",
+        "composer/installers": "~1.0 || ~2.0"
+    }
+}
