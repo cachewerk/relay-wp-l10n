@@ -6,6 +6,24 @@ Use [Relay](https://relay.so) to store WordPress translation in PHP runtime memo
 
 Install as plugin, or Must-Use plugin.
 
+### Composer installation
+
+To install the plugin using Composer, add the repository to your `composer.json`:
+
+```json
+{
+  "repositories": [
+    { "type": "vcs", "url": "git@github.com:cachewerk/relay-wp-l10n.git" }
+  ],
+}
+```
+
+Then simply run:
+
+```bash
+composer require cachewerk/relay-wp-l10n
+```
+
 ## Caveats
 
 - Translations are invalidated using `FLUSHDB`, be sure to set a dedicated `database` for translations so it won't flush the regular object cache as well

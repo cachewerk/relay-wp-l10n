@@ -9,10 +9,7 @@
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
-        "optimize-autoloader": true,
-        "allow-plugins": {
-            "composer/installers": true
-        }
+        "optimize-autoloader": true
     },
     "require": {
         "php": "^7.4 || ^8.0",
