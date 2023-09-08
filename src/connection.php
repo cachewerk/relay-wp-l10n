@@ -32,11 +32,11 @@ class RelayConnector
 
         $arguments = [
             $host,
-            $config->port ?? 0,
-            $config->timeout,
+            (int) ($config->port ?? 0),
+            (float) $config->timeout,
             $persistentId,
-            $config->retry_interval,
-            $config->read_timeout,
+            (int) $config->retry_interval,
+            (float) $config->read_timeout,
             $context,
         ];
 
