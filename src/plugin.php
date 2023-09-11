@@ -13,6 +13,16 @@ class RelayWordPressLocalization
 
     static Table $cache;
 
+    static bool $shouldPrintFootnote = false;
+
+    static int $statsMoLoaded = 0;
+    static int $statsJsonLoaded = 0;
+    static int $statsLoadFailed = 0;
+    static int $statsMoNotReadable = 0;
+    static int $statsJsonNotReadable = 0;
+    static int $statsIsReadableCall = 0;
+    static int $statsIsReadableCached = 0;
+
     public static function boot(object $config, Relay $connection): void
     {
         global $wp_version;
@@ -20,6 +30,13 @@ class RelayWordPressLocalization
         static::$config = $config;
         static::$connection = $connection;
         static::$cache = new Table;
+
+        add_action('wp_footer', [__CLASS__, 'shouldPrintMetricsFootnote']);
+        add_action('wp_body_open', [__CLASS__, 'shouldPrintMetricsFootnote']);
+        add_action('login_head', [__CLASS__, 'shouldPrintMetricsFootnote']);
+        add_action('in_admin_header', [__CLASS__, 'shouldPrintMetricsFootnote']);
+
+        add_action('shutdown', [__CLASS__, 'maybePrintMetricsFootnote'], PHP_INT_MAX);
 
         add_action('upgrader_process_complete', [__CLASS__, 'handleTranslationUpdates'], 10, 2);
 
@@ -53,6 +70,8 @@ class RelayWordPressLocalization
 	    $mofile = apply_filters('load_textdomain_mofile', $mofile, $domain);
 
         if (! static::isFileReadable($mofile)) {
+            static::$statsMoNotReadable++;
+
             return false;
         }
 
@@ -61,6 +80,7 @@ class RelayWordPressLocalization
 
         if (! $driver->load($domain, $mofile, $locale, $key)) {
             $wp_textdomain_registry->set($domain, $locale, false);
+            static::$statsLoadFailed++;
 
             return false;
         }
@@ -74,6 +94,8 @@ class RelayWordPressLocalization
         $l10n[$domain] = $driver;
 
         $wp_textdomain_registry->set($domain, $locale, dirname($mofile));
+
+        static::$statsMoLoaded++;
 
         return true;
     }
@@ -93,6 +115,8 @@ class RelayWordPressLocalization
         }
 
         if (! static::isFileReadable($file)) {
+            static::$statsJsonNotReadable++;
+
             return false;
         }
 
@@ -103,6 +127,8 @@ class RelayWordPressLocalization
         $key = "{$domain}-{$locale}-{$hash}-json";
 
         $translations = $driver->loadJson($file, $handle, $domain, $key);
+
+        static::$statsJsonLoaded++;
 
         return apply_filters('load_script_translations', $translations, $file, $handle, $domain);
     }
@@ -130,10 +156,56 @@ class RelayWordPressLocalization
 
         if (is_null($isReadable)) {
             $isReadable = is_readable($file);
+            static::$statsIsReadableCall++;
 
             static::$cache->set("readable:{$hash}", $isReadable);
+        } else {
+            static::$statsIsReadableCached++;
         }
 
         return $isReadable;
+    }
+
+    public static function shouldPrintMetricsFootnote()
+    {
+        if (! static::$config->footnote) {
+            return;
+        }
+
+        static::$shouldPrintFootnote = true;
+    }
+
+    public static function maybePrintMetricsFootnote()
+    {
+        if (! static::$shouldPrintFootnote) {
+            return;
+        }
+
+        if (
+            (defined('\WP_CLI') && constant('\WP_CLI')) ||
+            (defined('\REST_REQUEST') && constant('\REST_REQUEST')) ||
+            (defined('\XMLRPC_REQUEST') && constant('\XMLRPC_REQUEST')) ||
+            (defined('\DOING_AJAX') && constant('\DOING_AJAX')) ||
+            (defined('\DOING_CRON') && constant('\DOING_CRON')) ||
+            (defined('\DOING_AUTOSAVE') && constant('\DOING_AUTOSAVE'))
+        ) {
+            return;
+        }
+
+        if (is_robots() || is_trackback() || wp_is_json_request() || wp_is_jsonp_request()) {
+            return;
+        }
+
+        printf(
+            "\n<!-- plugin=%s mo-loaded=%d json-loaded=%d load-failed=%d mo-not-readable=%d json-not-readable=%d readable-call=%d readable-cached=%d -->\n",
+            'relay-wp-l10n',
+            static::$statsMoLoaded,
+            static::$statsJsonLoaded,
+            static::$statsLoadFailed,
+            static::$statsMoNotReadable,
+            static::$statsJsonNotReadable,
+            static::$statsIsReadableCall,
+            static::$statsIsReadableCached
+        );
     }
 }

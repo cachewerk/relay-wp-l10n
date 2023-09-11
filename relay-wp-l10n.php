@@ -48,6 +48,7 @@ require_once __DIR__ . '/src/translations.php';
         'retry_interval' => 20,
         'tls_options' => false,
         'persistent' => false,
+        'footnote' => true,
     ], $config);
 
     $connection = RelayConnector::connectToInstance($config);

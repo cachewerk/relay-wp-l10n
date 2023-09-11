@@ -59,5 +59,6 @@ define('RELAY_L10N_CONFIG', [
     'retry_interval' => 20,
     'tls_options' => false,
     'persistent' => false,
+    'footnote' => true,
 ] );
 ```
