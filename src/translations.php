@@ -124,9 +124,10 @@ class RelayTranslations
 
     protected function id($key): string
     {
-        $prefix = empty($this->config->prefix) ? "{$this->config->prefix}:" : '';
+        $key = str_replace([':', ' '], '-', (string) $key);
+        $prefix = ! empty($this->config->prefix) ? '' : "{$this->config->prefix}:";
 
-        return "{$prefix}translations:{$key}";
+        return trim(strtolower("{$prefix}translations:{$key}"), ':');
     }
 
     protected function extractEntries(MO $mo): array
