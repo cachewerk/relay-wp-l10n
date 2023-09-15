@@ -7,6 +7,8 @@ use Relay\Table;
 
 class RelayWordPressLocalization
 {
+    static string $file;
+
     static object $config;
 
     static Relay $connection;
@@ -23,10 +25,11 @@ class RelayWordPressLocalization
     static int $statsIsReadableCall = 0;
     static int $statsIsReadableCached = 0;
 
-    public static function boot(object $config, Relay $connection): void
+    public static function boot(string $file, object $config, Relay $connection): void
     {
         global $wp_version;
 
+        static::$file = $file;
         static::$config = $config;
         static::$connection = $connection;
         static::$cache = new Table;
@@ -196,9 +199,25 @@ class RelayWordPressLocalization
             return;
         }
 
+        $plugin = get_file_data(static::$file, ['Version' => 'Version']);
+
+        $relay = static::$connection->stats();
+        $endpointId = static::$connection->endpointId();
+        $endpoint = $relay['endpoints'][$endpointId] ?? null;
+        $redis = $endpoint['redis']['redis_version'] ?? null;
+
+        $memory = $relay['memory'];
+        $usedMemory = ($memory['total'] - $memory['used']) / $memory['total'] * 100;
+        $memoryThreshold = (int) ini_get('relay.maxmemory_pct') ?: 100;
+
         printf(
-            "\n<!-- plugin=%s mo-loaded=%d json-loaded=%d load-failed=%d mo-not-readable=%d json-not-readable=%d readable-call=%d readable-cached=%d -->\n",
+            "\n<!-- plugin=%s version=%s redis=%s relay=%s relay-memory=%s/%s mo-loaded=%d json-loaded=%d load-failed=%d mo-not-readable=%d json-not-readable=%d readable-call=%d readable-cached=%d -->\n",
             'relay-wp-l10n',
+            $plugin['Version'],
+            $redis,
+            phpversion('relay'),
+            round($usedMemory, 2),
+            $memoryThreshold,
             static::$statsMoLoaded,
             static::$statsJsonLoaded,
             static::$statsLoadFailed,

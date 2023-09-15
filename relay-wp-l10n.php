@@ -57,5 +57,5 @@ require_once __DIR__ . '/src/translations.php';
         error_log('relay-wp-l10n.warning: Relay in client-only mode');
     }
 
-    RelayWordPressLocalization::boot($config, $connection);
+    RelayWordPressLocalization::boot(__FILE__, $config, $connection);
 })(RELAY_L10N_CONFIG);
