@@ -207,17 +207,18 @@ class RelayWordPressLocalization
         $redis = $endpoint['redis']['redis_version'] ?? null;
 
         $memory = $relay['memory'];
-        $usedMemory = ($memory['total'] - $memory['used']) / $memory['total'] * 100;
+        // $usedMemory = ($memory['total'] - $memory['used']) / $memory['total'] * 100;
         $memoryThreshold = (int) ini_get('relay.maxmemory_pct') ?: 100;
 
         printf(
-            "\n<!-- plugin=%s version=%s redis=%s relay=%s relay-memory=%s/%s mo-loaded=%d json-loaded=%d load-failed=%d mo-not-readable=%d json-not-readable=%d readable-call=%d readable-cached=%d -->\n",
+            "\n<!-- plugin=%s version=%s redis=%s relay=%s relay-memory=%s/%s;%s mo-loaded=%d json-loaded=%d load-failed=%d mo-not-readable=%d json-not-readable=%d readable-call=%d readable-cached=%d -->\n",
             'relay-wp-l10n',
             $plugin['Version'],
             $redis,
             phpversion('relay'),
-            round($usedMemory, 2),
-            $memoryThreshold,
+            str_replace(' ', '', size_format($memory['used'])),
+            str_replace(' ', '', size_format($memory['total'])),
+            $memoryThreshold . '%',
             static::$statsMoLoaded,
             static::$statsJsonLoaded,
             static::$statsLoadFailed,
