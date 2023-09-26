@@ -43,6 +43,10 @@ class RelayWordPressLocalization
 
         add_action('upgrader_process_complete', [__CLASS__, 'handleTranslationUpdates'], 10, 2);
 
+        if (isset($_GET['nocache']) || isset($_COOKIE['nocache'])) {
+            return;
+        }
+
         add_filter('pre_load_script_translations', [__CLASS__, 'loadScriptTranslations'], 1, 4);
 
         if (version_compare($wp_version, '6.3', '>=')) {
