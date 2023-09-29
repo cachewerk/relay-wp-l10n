@@ -43,7 +43,11 @@ class RelayWordPressLocalization
 
         add_action('upgrader_process_complete', [__CLASS__, 'handleTranslationUpdates'], 10, 2);
 
-        if (isset($_GET['nocache']) || isset($_COOKIE['nocache'])) {
+        if (
+            ! empty($_GET['bypass-relay']) ||
+            ! empty($_COOKIE['bypass-relay']) ||
+            ! empty($_SERVER['HTTP_X_BYPASS_RELAY'])
+        ) {
             return;
         }
 
