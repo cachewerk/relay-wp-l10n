@@ -215,11 +215,20 @@ class RelayWordPressLocalization
         $redis = $endpoint['redis']['redis_version'] ?? null;
 
         $memory = $relay['memory'];
-        // $usedMemory = ($memory['total'] - $memory['used']) / $memory['total'] * 100;
         $memoryThreshold = (int) ini_get('relay.maxmemory_pct') ?: 100;
 
+        $metrics = implode(' ', [
+            'mo-cached=%d',
+            'json-cached=%d',
+            'mo-not-loaded=%d',
+            'mo-not-readable=%d',
+            'json-not-readable=%d',
+            'readable-called=%d',
+            'readable-cached=%d',
+        ]);
+
         printf(
-            "\n<!-- plugin=%s version=%s redis=%s relay=%s relay-memory=%s/%s;%s mo-loaded=%d json-loaded=%d load-failed=%d mo-not-readable=%d json-not-readable=%d readable-call=%d readable-cached=%d -->\n",
+            "\n<!-- plugin=%s version=%s redis=%s relay=%s relay-memory=%s/%s;%s {$metrics} -->\n",
             'relay-wp-l10n',
             $plugin['Version'],
             $redis,
