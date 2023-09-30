@@ -218,13 +218,13 @@ class RelayWordPressLocalization
         $memoryThreshold = (int) ini_get('relay.maxmemory_pct') ?: 100;
 
         $metrics = implode(' ', [
-            'mo-cached=%d',
-            'json-cached=%d',
-            'mo-not-loaded=%d',
-            'mo-not-readable=%d',
-            'json-not-readable=%d',
-            'readable-called=%d',
-            'readable-cached=%d',
+            'metric#mo-cached=%d',
+            'metric#json-cached=%d',
+            'metric#mo-not-loaded=%d',
+            'metric#mo-not-readable=%d',
+            'metric#json-not-readable=%d',
+            'metric#readable-called=%d',
+            'metric#readable-cached=%d',
         ]);
 
         printf(
