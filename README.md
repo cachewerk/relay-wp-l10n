@@ -27,6 +27,7 @@ composer require cachewerk/relay-wp-l10n
 ## Caveats
 
 - Translations are invalidated using `FLUSHDB`, be sure to set a dedicated `database` for translations so it won't flush the regular object cache as well
+- Relay's `Table` class currently caches data on a per-worker basis, so the cache needs to warm up for all workers in a FPM pool
 
 ## Configuration
 
