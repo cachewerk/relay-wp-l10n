@@ -1,4 +1,4 @@
-# Relay WordPress Localization
+# WordPress Localization cache using Relay
 
 Use [Relay](https://relay.so) to store WordPress translation in PHP runtime memory.
 
