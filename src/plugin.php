@@ -54,11 +54,7 @@ class RelayWordPressLocalization
         }
         add_action('upgrader_process_complete', [__CLASS__, 'handleTranslationUpdates'], 10, 2);
 
-        if (
-            ! empty($_GET['bypass-relay']) ||
-            ! empty($_COOKIE['bypass-relay']) ||
-            ! empty($_SERVER['HTTP_X_BYPASS_RELAY'])
-        ) {
+        if (static::shouldBypassCache()) {
             return;
         }
 
@@ -188,6 +184,13 @@ class RelayWordPressLocalization
         return $isReadable;
     }
 
+    public static function shouldBypassCache(): bool
+    {
+        return ! empty($_GET['bypass-relay'])
+            || ! empty($_COOKIE['bypass-relay'])
+            || ! empty($_SERVER['HTTP_X_BYPASS_RELAY']);
+    }
+
     public static function shouldPrintMetricsFootnote()
     {
         if (! static::$config->footnote) {
@@ -293,15 +296,15 @@ class RelayWordPressLocalization
             'metric#readable-cached=%d',
         ]);
 
-        printf(
-            "\n<!-- plugin=%s version=%s redis=%s relay=%s relay-memory=%s/%s;%s {$metrics} -->\n",
-            'relay-wp-l10n',
-            $plugin['Version'],
-            $redis,
+        return sprintf(
+            "relay=%s redis=%s db=%d usage=%s/%s;%s bypass=%d {$metrics}",
             phpversion('relay'),
+            $redis,
+            static::$config->database,
             str_replace(' ', '', size_format($memory['used'])),
             str_replace(' ', '', size_format($memory['total'])),
-            $memoryThreshold . '%',
+            "{$memoryThreshold}%",
+            static::shouldBypassCache(),
             static::$statsMoLoaded,
             static::$statsJsonLoaded,
             static::$statsLoadFailed,
