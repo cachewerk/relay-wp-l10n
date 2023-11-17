@@ -72,6 +72,16 @@ class RelayConnector
         $client->setOption(Relay::OPT_PHPREDIS_COMPATIBILITY, false);
         $client->setOption(Relay::OPT_SERIALIZER, Relay::SERIALIZER_IGBINARY);
 
+        if ($config->retries) {
+            $client->setOption(Relay::OPT_MAX_RETRIES, $config->retries);
+        }
+
+        if ($config->backoff === 'smart') {
+            $client->setOption(Relay::OPT_BACKOFF_ALGORITHM, Relay::BACKOFF_ALGORITHM_DECORRELATED_JITTER);
+            $client->setOption(Relay::OPT_BACKOFF_BASE, 500);
+            $client->setOption(Relay::OPT_BACKOFF_CAP, 750);
+        }
+
         return $client;
     }
 
@@ -79,10 +89,6 @@ class RelayConnector
     {
         if ($config->backoff === 'none') {
             return $retries;
-        }
-
-        if ($config->backoff === 'exponential') {
-            return $retries ** 2;
         }
 
         $retryInterval = $config->retry_interval;
