@@ -27,14 +27,12 @@ class RelayWordPressLocalization
     static int $statsIsReadableCall = 0;
     static int $statsIsReadableCached = 0;
 
-    public static function boot(string $file, object $config, Relay $connection): void
+    public static function boot(string $file, object $config): void
     {
         global $wp_version;
 
         static::$file = $file;
         static::$config = $config;
-        static::$connection = $connection;
-        static::$cache = new Table;
 
         add_action('admin_notices', [__CLASS__, 'maybePrintAdminNotice']);
 
@@ -52,6 +50,17 @@ class RelayWordPressLocalization
         if (! static::relayCacheIsEnabled()) {
             return;
         }
+
+        try {
+            static::$cache = new Table;
+            static::$connection = RelayConnector::connectToInstance($config);
+        } catch (Throwable $th) {
+            static::$error = $th->getMessage();
+            error_log("relay-wp-l10n.warning: {$th->getMessage()}");
+
+            return;
+        }
+
         add_action('upgrader_process_complete', [__CLASS__, 'handleTranslationUpdates'], 10, 2);
 
         if (static::shouldBypassCache()) {

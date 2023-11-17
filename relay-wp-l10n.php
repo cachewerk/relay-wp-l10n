@@ -39,7 +39,5 @@ require_once __DIR__ . '/src/translations.php';
         'footnote' => true,
     ], $config);
 
-    $connection = RelayConnector::connectToInstance($config);
-
-    RelayWordPressLocalization::boot(__FILE__, $config, $connection);
+    RelayWordPressLocalization::boot(__FILE__, $config);
 })(RELAY_L10N_CONFIG);
