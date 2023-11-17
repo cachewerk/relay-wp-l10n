@@ -69,6 +69,7 @@ class RelayConnector
             }
         }
 
+        $client->setOption(Relay::OPT_PHPREDIS_COMPATIBILITY, false);
         $client->setOption(Relay::OPT_SERIALIZER, Relay::SERIALIZER_IGBINARY);
 
         return $client;
@@ -77,6 +78,10 @@ class RelayConnector
     public static function nextDelay(object $config, int $retries): int
     {
         if ($config->backoff === 'none') {
+            return $retries;
+        }
+
+        if ($config->backoff === 'exponential') {
             return $retries ** 2;
         }
 

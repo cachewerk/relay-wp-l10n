@@ -29,7 +29,7 @@ if (version_compare(phpversion('relay'), '0.6.6', '<=')) {
 }
 
 require_once __DIR__ . '/src/plugin.php';
-require_once __DIR__ . '/src/connection.php';
+require_once __DIR__ . '/src/connector.php';
 require_once __DIR__ . '/src/translations.php';
 
 (function ($config) {
