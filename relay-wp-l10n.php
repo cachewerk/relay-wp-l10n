@@ -16,18 +16,6 @@ if (! defined('RELAY_L10N_CONFIG') || ! is_array(RELAY_L10N_CONFIG)) {
     return;
 }
 
-if (! extension_loaded('relay')) {
-    error_log('relay-wp-l10n.warning: Relay extension not loaded');
-
-    return;
-}
-
-if (version_compare(phpversion('relay'), '0.6.6', '<=')) {
-    error_log('relay-wp-l10n.warning: Relay v0.6.7 required');
-
-    return;
-}
-
 require_once __DIR__ . '/src/plugin.php';
 require_once __DIR__ . '/src/connector.php';
 require_once __DIR__ . '/src/translations.php';
@@ -52,10 +40,6 @@ require_once __DIR__ . '/src/translations.php';
     ], $config);
 
     $connection = RelayConnector::connectToInstance($config);
-
-    if (! $connection->maxMemory()) {
-        error_log('relay-wp-l10n.warning: Relay in client-only mode');
-    }
 
     RelayWordPressLocalization::boot(__FILE__, $config, $connection);
 })(RELAY_L10N_CONFIG);

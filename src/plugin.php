@@ -17,6 +17,8 @@ class RelayWordPressLocalization
 
     static bool $shouldPrintFootnote = false;
 
+    static ?string $error = null;
+
     static int $statsMoLoaded = 0;
     static int $statsJsonLoaded = 0;
     static int $statsLoadFailed = 0;
@@ -34,6 +36,8 @@ class RelayWordPressLocalization
         static::$connection = $connection;
         static::$cache = new Table;
 
+        add_action('admin_notices', [__CLASS__, 'maybePrintAdminNotice']);
+
         add_action('wp_footer', [__CLASS__, 'shouldPrintMetricsFootnote']);
         add_action('wp_body_open', [__CLASS__, 'shouldPrintMetricsFootnote']);
         add_action('login_head', [__CLASS__, 'shouldPrintMetricsFootnote']);
@@ -41,6 +45,13 @@ class RelayWordPressLocalization
 
         add_action('shutdown', [__CLASS__, 'maybePrintMetricsFootnote'], PHP_INT_MAX);
 
+        if (! static::relayExtensionIsLoaded()) {
+            return;
+        }
+
+        if (! static::relayCacheIsEnabled()) {
+            return;
+        }
         add_action('upgrader_process_complete', [__CLASS__, 'handleTranslationUpdates'], 10, 2);
 
         if (
@@ -186,7 +197,50 @@ class RelayWordPressLocalization
         static::$shouldPrintFootnote = true;
     }
 
-    public static function maybePrintMetricsFootnote()
+    protected static function relayExtensionIsLoaded(): bool
+    {
+        if (! extension_loaded('relay')) {
+            static::$error = 'Relay extension not loaded in ' . PHP_SAPI . ' environment';
+            error_log('relay-wp-l10n.warning: ' . static::$error);
+
+            return false;
+        }
+
+        if (version_compare(phpversion('relay'), '0.6.6', '<=')) {
+            static::$error = 'Relay version v0.6.7 required, found ' . phpversion('relay');
+            error_log('relay-wp-l10n.warning: ' . static::$error);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    protected static function relayCacheIsEnabled(): bool
+    {
+        if (Relay::maxMemory() > 0) {
+            return true;
+        }
+
+        static::$error = 'Relay is in client-only mode';
+        error_log('relay-wp-l10n.warning: ' . static::$error);
+
+        return false;
+    }
+
+    public static function maybePrintAdminNotice(): void
+    {
+        if (! static::$error) {
+            return;
+        }
+
+        printf(
+            '<div class="notice notice-warning"><p><b>Relay Localizations</b>: %s.</p></div>',
+            esc_html(static::$error)
+        );
+    }
+
+    public static function maybePrintMetricsFootnote(): void
     {
         if (! static::$shouldPrintFootnote) {
             return;
@@ -209,6 +263,18 @@ class RelayWordPressLocalization
 
         $plugin = get_file_data(static::$file, ['Version' => 'Version']);
 
+        printf(
+            "\n<!-- plugin=%s version=%s %s -->\n",
+            'relay-wp-l10n',
+            $plugin['Version'],
+            static::$error
+                ? "error=" . strtolower(static::$error)
+                : static::metrics(),
+        );
+    }
+
+    protected static function metrics(): string
+    {
         $relay = static::$connection->stats();
         $endpointId = static::$connection->endpointId();
         $endpoint = $relay['endpoints'][$endpointId] ?? null;
