@@ -43,24 +43,22 @@ define('RELAY_L10N_CONFIG', [
 ] );
 ```
 
-The default values are:
+### Default configuration
 
-```php
-define('RELAY_L10N_CONFIG', [
-    'scheme' => 'tcp',
-    'host' => '127.0.0.1',
-    'port' => 6379,
-    'database' => 0,
-    'username' => null,
-    'password' => null,
-    'prefix' => null,
-    'timeout' => 0.5,
-    'read_timeout' => 0.5,
-    'backoff' => 'smart',
-    'retries' => 3,
-    'retry_interval' => 20,
-    'tls_options' => false,
-    'persistent' => false,
-    'footnote' => true,
-] );
-```
+| Option           | Default     | Description |
+| ---------------- | ----------- | ----------- |
+| `scheme`         | `tcp`       | |
+| `host`           | `127.0.0.1` | |
+| `port`           | `6379`      | |
+| `database`       | `0`         | |
+| `username`       |             | |
+| `password`       |             | |
+| `prefix`         |             | |
+| `timeout`        | `0.5`       | |
+| `read_timeout`   | `0.5`       | |
+| `backoff`        | `smart`     | Supports: `none`, `smart` |
+| `retries`        | `3`         | |
+| `retry_interval` | `20`        | |
+| `tls_options`    | `false`     | |
+| `persistent`     | `false`     | Whether to use a persistent connection |
+| `footnote`       | `true`      | Whether to print a HTML comment with statistics |
