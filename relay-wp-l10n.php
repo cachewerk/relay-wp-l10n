@@ -3,7 +3,7 @@
  * Plugin Name: Relay Localizations
  * Plugin URI: https://relay.so
  * Description: Faster WordPress localization using Relay's in-memory cache.
- * Version: 1.0.1-dev
+ * Version: 1.0.1
  * Author: CacheWerk
  * Author URI: https://cachewerk.com
  * License: MIT
